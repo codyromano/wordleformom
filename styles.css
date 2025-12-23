@@ -1,0 +1,389 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.container {
+  background: white;
+  border-radius: 20px;
+  padding: 15px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  margin: 5px auto;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 40px;
+    margin: 10px auto;
+  }
+}
+
+h1 {
+  text-align: center;
+  color: #667eea;
+  margin-bottom: 5px;
+  font-size: 1.3em;
+  font-weight: 700;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 12px;
+  font-size: 0.8em;
+  font-weight: 400;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+  }
+  
+  .subtitle {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+  }
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 7.5px;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .board {
+    margin-bottom: 10px;
+  }
+}
+
+.tile {
+  aspect-ratio: 1;
+  width: 62px;
+  height: 62px;
+  flex-shrink: 0;
+  border: 2px solid #d3d6da;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(1.2em, 3vh, 2em);
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .tile {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+.tile.filled {
+  border-color: #878a8c;
+  animation: pop 0.1s ease-in-out;
+}
+
+.tile.correct {
+  background: #6aaa64;
+  border-color: #6aaa64;
+  color: white;
+}
+
+.tile.present {
+  background: #c9b458;
+  border-color: #c9b458;
+  color: white;
+}
+
+.tile.absent {
+  background: #787c7e;
+  border-color: #787c7e;
+  color: white;
+}
+
+@keyframes pop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.keyboard {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.key {
+  background: #d3d6da;
+  border: none;
+  border-radius: 4px;
+  padding: 15px;
+  min-width: 40px;
+  font-size: 0.9em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.key:hover {
+  background: #bbb;
+}
+
+.key.wide {
+  min-width: 65px;
+  font-size: 0.75em;
+}
+
+.key.correct {
+  background: #6aaa64;
+  color: white;
+}
+
+.key.present {
+  background: #c9b458;
+  color: white;
+}
+
+.key.absent {
+  background: #787c7e;
+  color: white;
+}
+
+.message {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 0.95em;
+  color: #667eea;
+  min-height: 25px;
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .message {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    min-height: 30px;
+  }
+}
+
+.mobile-input-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .mobile-input-container {
+    display: none;
+  }
+}
+
+.mobile-input {
+  flex: 1;
+  padding: 15px;
+  font-size: 16px;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.mobile-input::placeholder {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+.mobile-input:focus {
+  outline: none;
+  border-color: #764ba2;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.mobile-submit-btn {
+  padding: 15px 20px;
+  font-size: 1.2em;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #667eea;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.mobile-submit-btn:active:not(:disabled) {
+  background: #764ba2;
+}
+
+.mobile-submit-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.compliment-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.compliment-modal.show {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.compliment-content {
+  background: white;
+  border-radius: 20px;
+  padding: 30px 20px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  animation: slideUp 0.4s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+  .compliment-content {
+    padding: 40px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.compliment-content h2 {
+  color: #667eea;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  font-weight: 700;
+}
+
+.compliment-text {
+  font-size: 1.05em;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 15px;
+  font-style: italic;
+  font-weight: 400;
+}
+
+@media (min-width: 768px) {
+  .compliment-content h2 {
+    margin-bottom: 20px;
+    font-size: 1.8em;
+  }
+  
+  .compliment-text {
+    font-size: 1.2em;
+  }
+}
+
+.compliment-from {
+  color: #764ba2;
+  font-weight: 700;
+  margin-top: 20px;
+}
+
+.close-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #764ba2;
+  transform: translateY(-2px);
+}
+
+.snowflake {
+  position: fixed;
+  top: -10px;
+  color: white;
+  font-size: 1em;
+  opacity: 0.8;
+  animation: fall linear infinite;
+  z-index: 999;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh);
+  }
+}

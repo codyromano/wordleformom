@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wordle For Mom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Wordle For Mom</h1>
+    <p class="subtitle" id="date-subtitle"></p>
+    
+    <div class="board" id="board"></div>
+    <div class="message" id="message"></div>
+    
+    <div class="mobile-input-container">
+      <input type="text" class="mobile-input" id="mobileInput" placeholder="Type your guess..." maxlength="5" autocomplete="off" autocorrect="off" autocapitalize="characters">
+      <button class="mobile-submit-btn" id="submitBtn" onclick="handleMobileSubmit()" disabled>→</button>
+    </div>
+    
+    <div class="keyboard" id="keyboard"></div>
+  </div>
+
+  <div class="compliment-modal" id="modal">
+    <div class="compliment-content">
+      <h2 id="modal-heading">🎉 Today's Word 🎉</h2>
+      <p class="compliment-text" id="compliment"></p>
+      <p class="compliment-from" id="from"></p>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script src="puzzles.js"></script>
+  <script>
+
+    // Format and display current date
+    function formatDate() {
+      const now = new Date();
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      const dayName = days[now.getDay()];
+      const monthName = months[now.getMonth()];
+      const date = now.getDate();
+      
+      // Add ordinal suffix
+      let suffix = 'th';
+      if (date === 1 || date === 21 || date === 31) suffix = 'st';
+      else if (date === 2 || date === 22) suffix = 'nd';
+      else if (date === 3 || date === 23) suffix = 'rd';
+      
+      return `${dayName}, ${monthName} ${date}${suffix}`;
+    }
+    
+    document.getElementById('date-subtitle').textContent = formatDate();
+
+    // Get day of year to determine which puzzle
+    function getDayOfYear() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 0);
+      const diff = now - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      return Math.floor(diff / oneDay);
+    }
+
+    const puzzleIndex = getDayOfYear() % dailyPuzzles.length;
+    const todaysPuzzle = dailyPuzzles[puzzleIndex];
+    const TARGET_WORD = todaysPuzzle.word;
+    const MAX_GUESSES = 6;
+
+    let currentRow = 0;
+    let currentTile = 0;
+    let gameOver = false;
+    const guesses = [];
+    const keyStates = {};
+
+    // Create board
+    const board = document.getElementById('board');
+    for (let i = 0; i < MAX_GUESSES; i++) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      for (let j = 0; j < 5; j++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.id = `tile-${i}-${j}`;
+        row.appendChild(tile);
+      }
+      board.appendChild(row);
+    }
+
+    // Create keyboard
+    const keyboard = document.getElementById('keyboard');
+    const rows = [
+      ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+      ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+      ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
+    ];
+
+    rows.forEach(row => {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'keyboard-row';
+      row.forEach(key => {
+        const keyBtn = document.createElement('button');
+        keyBtn.className = 'key';
+        keyBtn.textContent = key;
+        keyBtn.id = `key-${key}`;
+        if (key === 'ENTER' || key === '⌫') {
+          keyBtn.classList.add('wide');
+        }
+        keyBtn.onclick = () => handleKey(key);
+        rowDiv.appendChild(keyBtn);
+      });
+      keyboard.appendChild(rowDiv);
+    });
+
+    function handleKey(key) {
+      if (gameOver) return;
+
+      if (key === '⌫') {
+        deleteLetter();
+      } else if (key === 'ENTER') {
+        submitGuess();
+      } else if (currentTile < 5) {
+        addLetter(key);
+      }
+    }
+
+    function addLetter(letter) {
+      if (currentTile < 5) {
+        const tile = document.getElementById(`tile-${currentRow}-${currentTile}`);
+        tile.textContent = letter;
+        tile.classList.add('filled');
+        currentTile++;
+      }
+    }
+
+    function deleteLetter() {
+      if (currentTile > 0) {
+        currentTile--;
+        const tile = document.getElementById(`tile-${currentRow}-${currentTile}`);
+        tile.textContent = '';
+        tile.classList.remove('filled');
+      }
+    }
+
+    function submitGuess() {
+      if (currentTile !== 5) {
+        showMessage('Not enough letters');
+        return;
+      }
+
+      const guess = [];
+      for (let i = 0; i < 5; i++) {
+        const tile = document.getElementById(`tile-${currentRow}-${i}`);
+        guess.push(tile.textContent);
+      }
+      const guessWord = guess.join('');
+
+      // Check guess
+      const result = checkGuess(guessWord);
+      animateRow(currentRow, result, guessWord);
+
+      if (guessWord === TARGET_WORD) {
+        gameOver = true;
+        setTimeout(() => {
+          showCompliment();
+        }, 2000);
+      } else if (currentRow === MAX_GUESSES - 1) {
+        gameOver = true;
+        setTimeout(() => {
+          showCompliment();
+        }, 2000);
+      } else {
+        currentRow++;
+        currentTile = 0;
+      }
+    }
+
+    function checkGuess(guess) {
+      const result = [];
+      const targetLetters = TARGET_WORD.split('');
+      const guessLetters = guess.split('');
+      const used = new Array(5).fill(false);
+
+      // Check for correct positions
+      for (let i = 0; i < 5; i++) {
+        if (guessLetters[i] === targetLetters[i]) {
+          result[i] = 'correct';
+          used[i] = true;
+        }
+      }
+
+      // Check for present letters
+      for (let i = 0; i < 5; i++) {
+        if (result[i]) continue;
+        
+        let found = false;
+        for (let j = 0; j < 5; j++) {
+          if (!used[j] && guessLetters[i] === targetLetters[j]) {
+            result[i] = 'present';
+            used[j] = true;
+            found = true;
+            break;
+          }
+        }
+        
+        if (!found) {
+          result[i] = 'absent';
+        }
+      }
+
+      return result;
+    }
+
+    function animateRow(row, result, guess) {
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const tile = document.getElementById(`tile-${row}-${i}`);
+          tile.classList.add(result[i]);
+          
+          const letter = guess[i];
+          const keyEl = document.getElementById(`key-${letter}`);
+          
+          if (!keyStates[letter] || 
+              (keyStates[letter] === 'absent' && result[i] !== 'absent') ||
+              (keyStates[letter] === 'present' && result[i] === 'correct')) {
+            keyStates[letter] = result[i];
+            keyEl.classList.remove('absent', 'present', 'correct');
+            keyEl.classList.add(result[i]);
+          }
+        }, i * 300);
+      }
+    }
+
+    function showMessage(msg) {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = msg;
+      setTimeout(() => {
+        messageEl.textContent = '';
+      }, 2000);
+    }
+
+    function showCompliment() {
+      document.getElementById('modal-heading').textContent = `🎉 Today's Word: ${TARGET_WORD} 🎉`;
+      document.getElementById('compliment').textContent = todaysPuzzle.compliment;
+      document.getElementById('from').textContent = todaysPuzzle.from;
+      document.getElementById('modal').classList.add('show');
+      createSnowflakes();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
+
+    function createSnowflakes() {
+      for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+          const snowflake = document.createElement('div');
+          snowflake.className = 'snowflake';
+          snowflake.textContent = '❄';
+          snowflake.style.left = Math.random() * 100 + '%';
+          snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+          snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+          document.body.appendChild(snowflake);
+          
+          setTimeout(() => snowflake.remove(), 5000);
+        }, i * 100);
+      }
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (gameOver) return;
+      
+      if (e.key === 'Enter') {
+        handleKey('ENTER');
+      } else if (e.key === 'Backspace') {
+        handleKey('⌫');
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        handleKey(e.key.toUpperCase());
+      }
+    });
+
+    // Mobile input handling
+    const mobileInput = document.getElementById('mobileInput');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    function updateMobileButtons() {
+      const isFull = mobileInput.value.length === 5;
+      submitBtn.disabled = !isFull;
+    }
+    
+    mobileInput.addEventListener('input', (e) => {
+      if (gameOver) return;
+      
+      let value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+      e.target.value = value;
+      
+      // Clear current row
+      for (let i = 0; i < 5; i++) {
+        const tile = document.getElementById(`tile-${currentRow}-${i}`);
+        tile.textContent = '';
+        tile.classList.remove('filled');
+      }
+      
+      // Fill tiles with input value
+      currentTile = 0;
+      for (let i = 0; i < value.length && i < 5; i++) {
+        const tile = document.getElementById(`tile-${currentRow}-${i}`);
+        tile.textContent = value[i];
+        tile.classList.add('filled');
+        currentTile++;
+      }
+      
+      updateMobileButtons();
+    });
+    
+    mobileInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !submitBtn.disabled) {
+        handleMobileSubmit();
+      }
+    });
+    
+    function handleMobileSubmit() {
+      if (gameOver) return;
+      submitGuess();
+      mobileInput.value = '';
+      updateMobileButtons();
+    }
+  </script>
+</body>
+</html>

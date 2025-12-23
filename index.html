@@ -11,18 +11,29 @@
 </head>
 <body>
   <div class="container">
-    <h1>Wordle For Mom</h1>
-    <p class="subtitle" id="date-subtitle"></p>
-    
-    <div class="board" id="board"></div>
-    <div class="message" id="message"></div>
-    
-    <div class="mobile-input-container">
-      <input type="text" class="mobile-input" id="mobileInput" placeholder="Type your guess..." maxlength="5" autocomplete="off" autocorrect="off" autocapitalize="characters">
-      <button class="mobile-submit-btn" id="submitBtn" onclick="handleMobileSubmit()" disabled>→</button>
+    <div class="app-header">
+      <h1>Wordle For Mom</h1>
+      <p class="subtitle" id="date-subtitle"></p>
     </div>
     
-    <div class="keyboard" id="keyboard"></div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('game')">Play</button>
+      <button class="tab-btn" id="complimentsTab" onclick="switchTab('compliments')">
+        Compliments
+        <span class="tab-notification-bell" id="tabNotificationBadge" style="display: none;">🔔</span>
+      </button>
+    </div>
+
+    <div class="tab-content" id="gameTab">
+      <div class="board" id="board"></div>
+      <div class="message" id="message"></div>
+      
+      <div class="keyboard" id="keyboard"></div>
+    </div>
+
+    <div class="tab-content" id="complimentsTabContent" style="display: none;">
+      <div class="compliments-list" id="complimentsList"></div>
+    </div>
   </div>
 
   <div class="compliment-modal" id="modal">
@@ -58,16 +69,8 @@
     
     document.getElementById('date-subtitle').textContent = formatDate();
 
-    // Get day of year to determine which puzzle
-    function getDayOfYear() {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), 0, 0);
-      const diff = now - start;
-      const oneDay = 1000 * 60 * 60 * 24;
-      return Math.floor(diff / oneDay);
-    }
-
-    const puzzleIndex = getDayOfYear() % dailyPuzzles.length;
+    // Get random puzzle
+    const puzzleIndex = Math.floor(Math.random() * dailyPuzzles.length);
     const todaysPuzzle = dailyPuzzles[puzzleIndex];
     const TARGET_WORD = todaysPuzzle.word;
     const MAX_GUESSES = 6;
@@ -250,11 +253,101 @@
       document.getElementById('from').textContent = todaysPuzzle.from;
       document.getElementById('modal').classList.add('show');
       createSnowflakes();
+      
+      // Save compliment to local storage
+      saveCompliment(TARGET_WORD, todaysPuzzle.compliment, todaysPuzzle.from);
     }
 
     function closeModal() {
       document.getElementById('modal').classList.remove('show');
     }
+
+    // Local storage functions
+    function saveCompliment(word, compliment, from) {
+      const compliments = getCompliments();
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Check if already saved for today
+      const exists = compliments.some(c => c.word === word);
+      if (!exists) {
+        compliments.push({
+          word: word,
+          compliment: compliment,
+          from: from,
+          date: today,
+          unread: true
+        });
+        localStorage.setItem('compliments', JSON.stringify(compliments));
+        updateNotificationBadge();
+      }
+    }
+
+    function getCompliments() {
+      const saved = localStorage.getItem('compliments');
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    function updateNotificationBadge() {
+      const compliments = getCompliments();
+      const unreadCount = compliments.filter(c => c.unread).length;
+      const badge = document.getElementById('tabNotificationBadge');
+      
+      if (unreadCount > 0) {
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function markAllAsRead() {
+      const compliments = getCompliments();
+      compliments.forEach(c => c.unread = false);
+      localStorage.setItem('compliments', JSON.stringify(compliments));
+      updateNotificationBadge();
+    }
+
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      // Update tab content
+      if (tabName === 'game') {
+        document.getElementById('gameTab').style.display = 'block';
+        document.getElementById('complimentsTabContent').style.display = 'none';
+      } else if (tabName === 'compliments') {
+        document.getElementById('gameTab').style.display = 'none';
+        document.getElementById('complimentsTabContent').style.display = 'block';
+        loadComplimentsList();
+        markAllAsRead();
+      }
+    }
+
+    function loadComplimentsList() {
+      const compliments = getCompliments();
+      const listEl = document.getElementById('complimentsList');
+      
+      if (compliments.length === 0) {
+        listEl.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No compliments yet! Keep playing to unlock them. ❤️</p>';
+      } else {
+        listEl.innerHTML = compliments.reverse().map(c => {
+          const date = new Date(c.date);
+          const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          
+          return `
+            <div class="compliment-card">
+              <div class="compliment-card-word">${c.word}</div>
+              <div class="compliment-card-text">${c.compliment}</div>
+              <div class="compliment-card-from">${c.from}</div>
+              <div class="compliment-card-date">${formattedDate}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Initialize notification badge on page load
+    updateNotificationBadge();
 
     function createSnowflakes() {
       for (let i = 0; i < 30; i++) {

@@ -8,5 +8,15 @@ const dailyPuzzles = [
   { word: "LUCKY", compliment: "I'm lucky to have you as my mother in law.", from: "— Joycie" },
   { word: "BUDDY", compliment: "I admire the way you can befriend anyone.", from: "— Joycie" },
   { word: "YEARS", compliment: "In all of my 70 years of meeting people and making friends, Kim is by far the most creative, intelligent, sensitive, beautiful people I've ever met.", from: "— Carol" },
-  { word: "WORLD", compliment: "Kim makes the world brighter, smarter, kinder, and more colorful wherever she is.", from: "— Carol" }
+  { word: "WORLD", compliment: "Kim makes the world brighter, smarter, kinder, and more colorful wherever she is.", from: "— Carol" },
+  { word: "KNOWS", compliment: "Kim is one of the best people I know.", from: "— Danae" },
+  { word: "HEART", compliment: "Kim is deeply kind and generous with her time, energy, and love.", from: "— Danae" },
+  { word: "LIVES", compliment: "Kim inspires me with how she lives her life according to her own vision, and no one else's.", from: "— Danae" },
+  { word: "RIGHT", compliment: "Kim Romano always finds a way to do the right thing with unwavering persistence. She is truly a champion for good.", from: "— Sal" },
+  { word: "FAVOR", compliment: "I like a lot of people but I cherish very few. Kim is my favorite and most cherished friend.", from: "— Caitlin" },
+  { word: "MAGIC", compliment: "She is kind, thoughtful, hilarious, smart, witty, beautiful inside and out, and has the warmest magic ora.", from: "— Caitlin" },
+  { word: "FEELS", compliment: "Being around Kim feels like home, like family I've been missing until now. I cherish you, Kim.", from: "— Caitlin" },
+  { word: "HUMOR", compliment: "Infectious energy & sense of humor!", from: "— Brooke" },
+  { word: "LOYAL", compliment: "Boundless love for and commitment to Cody - from Key West, to Boston to Seattle!", from: "— Brooke" },
+  { word: "GIVES", compliment: "Engaged with and giving back to her community!", from: "— Brooke" }
 ];

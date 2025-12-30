@@ -100,7 +100,7 @@
     const rows = [
       ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
       ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-      ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
+      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
     ];
 
     rows.forEach(row => {
@@ -111,7 +111,7 @@
         keyBtn.className = 'key';
         keyBtn.textContent = key;
         keyBtn.id = `key-${key}`;
-        if (key === 'ENTER' || key === '⌫') {
+        if (key === '⌫') {
           keyBtn.classList.add('wide');
         }
         keyBtn.onclick = () => handleKey(key);
@@ -125,8 +125,6 @@
 
       if (key === '⌫') {
         deleteLetter();
-      } else if (key === 'ENTER') {
-        submitGuess();
       } else if (currentTile < 5) {
         addLetter(key);
       }
@@ -138,6 +136,13 @@
         tile.textContent = letter;
         tile.classList.add('filled');
         currentTile++;
+        
+        // Auto-submit when the last letter is entered
+        if (currentTile === 5) {
+          setTimeout(() => {
+            submitGuess();
+          }, 100);
+        }
       }
     }
 

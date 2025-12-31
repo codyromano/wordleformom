@@ -18,5 +18,6 @@ const dailyPuzzles = [
   { word: "FEELS", compliment: "Being around Kim feels like home, like family I've been missing until now. I cherish you, Kim.", from: "— Caitlin" },
   { word: "HUMOR", compliment: "Infectious energy & sense of humor!", from: "— Brooke" },
   { word: "LOYAL", compliment: "Boundless love for and commitment to Cody - from Key West, to Boston to Seattle!", from: "— Brooke" },
-  { word: "GIVES", compliment: "Engaged with and giving back to her community!", from: "— Brooke" }
+  { word: "GIVES", compliment: "Engaged with and giving back to her community!", from: "— Brooke" },
+  { word: "PAPER", compliment: "I admire how quickly you read all the papers on Sunday mornings!", from: "— Cody" }
 ];

@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Wordle For Mom</title>
+  <title>Kim's Wordle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
     <div class="app-header">
-      <h1>Wordle For Mom</h1>
+      <h1>Kim's Wordl<span id="debug-e">e</span></h1>
       <p class="subtitle" id="date-subtitle"></p>
     </div>
     
@@ -45,6 +45,8 @@
     </div>
   </div>
 
+  <div class="version-number">v1.0.6</div>
+
   <script src="puzzles.js"></script>
   <script>
 
@@ -68,6 +70,22 @@
     }
     
     document.getElementById('date-subtitle').textContent = formatDate();
+
+    // Debug feature: tap "e" in Wordle 5 times to show answer
+    let debugTapCount = 0;
+    let debugOriginalText = '';
+    document.getElementById('debug-e').addEventListener('click', function(e) {
+      e.stopPropagation();
+      debugTapCount++;
+      if (debugTapCount === 5) {
+        debugOriginalText = document.getElementById('date-subtitle').textContent;
+        document.getElementById('date-subtitle').textContent = `Answer: ${TARGET_WORD.toUpperCase()}`;
+        setTimeout(() => {
+          document.getElementById('date-subtitle').textContent = debugOriginalText;
+          debugTapCount = 0;
+        }, 3000);
+      }
+    });
 
     // Get random puzzle
     const puzzleIndex = Math.floor(Math.random() * dailyPuzzles.length);
@@ -100,7 +118,7 @@
     const rows = [
       ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
       ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
+      ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
     ];
 
     rows.forEach(row => {
@@ -111,7 +129,7 @@
         keyBtn.className = 'key';
         keyBtn.textContent = key;
         keyBtn.id = `key-${key}`;
-        if (key === '⌫') {
+        if (key === '⌫' || key === 'ENTER') {
           keyBtn.classList.add('wide');
         }
         keyBtn.onclick = () => handleKey(key);
@@ -125,6 +143,8 @@
 
       if (key === '⌫') {
         deleteLetter();
+      } else if (key === 'ENTER') {
+        submitGuess();
       } else if (currentTile < 5) {
         addLetter(key);
       }
@@ -136,13 +156,6 @@
         tile.textContent = letter;
         tile.classList.add('filled');
         currentTile++;
-        
-        // Auto-submit when the last letter is entered
-        if (currentTile === 5) {
-          setTimeout(() => {
-            submitGuess();
-          }, 100);
-        }
       }
     }
 

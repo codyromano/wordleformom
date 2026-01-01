@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=1.0.7">
 </head>
 <body>
   <!-- Intro Page -->
@@ -34,7 +34,7 @@
   <!-- Main Game -->
   <div class="container" id="mainGame" style="display: none;">
     <div class="app-header">
-      <h1>Kim's Wordl<span id="debug-e">e</span></h1>
+      <h1>Kim's Wordle</h1>
       <p class="subtitle" id="date-subtitle"></p>
     </div>
     
@@ -47,10 +47,25 @@
     </div>
 
     <div class="tab-content" id="gameTab">
-      <div class="board" id="board"></div>
-      <div class="message" id="message"></div>
-      
-      <div class="keyboard" id="keyboard"></div>
+      <div class="waiting-message" id="waitingMessage" style="display: none;">
+        <div class="waiting-icon">⏰</div>
+        <h2 class="waiting-title">Come back tomorrow!</h2>
+        <p class="waiting-text">You've already completed today's puzzle.</p>
+        <p class="waiting-countdown" id="countdown"></p>
+      </div>
+      <div class="completed-message" id="completedMessage" style="display: none;">
+        <div class="completed-icon">🎉</div>
+        <h2 class="completed-title">Congratulations!</h2>
+        <p class="completed-text">You've completed all puzzles!</p>
+        <p class="completed-subtext">You've unlocked all the wonderful compliments from your friends and family.</p>
+        <button class="reset-button" onclick="resetAllPuzzles()">Play Again</button>
+      </div>
+      <div id="gameContent">
+        <div class="board" id="board"></div>
+        <div class="message" id="message"></div>
+        
+        <div class="keyboard" id="keyboard"></div>
+      </div>
     </div>
 
     <div class="tab-content" id="complimentsTabContent" style="display: none;">
@@ -67,19 +82,206 @@
     </div>
   </div>
 
-  <div class="version-number">v1.0.6</div>
+  <!-- Debug Modal -->
+  <div class="debug-modal" id="debugModal">
+    <div class="debug-modal-content">
+      <div class="debug-modal-header">
+        <h2>Debug Tools</h2>
+        <button class="debug-close-btn" onclick="closeDebugModal()">×</button>
+      </div>
+      
+      <div class="debug-section">
+        <h3>Current Puzzle</h3>
+        <p class="debug-solution" id="debugSolution">—</p>
+      </div>
+      
+      <div class="debug-section">
+        <h3>Time Override</h3>
+        <div class="debug-time-controls">
+          <button onclick="adjustDebugTime(-24)">-24h</button>
+          <button onclick="adjustDebugTime(-12)">-12h</button>
+          <button onclick="adjustDebugTime(12)">+12h</button>
+          <button onclick="adjustDebugTime(24)">+24h</button>
+          <button onclick="resetDebugTime()">Reset</button>
+        </div>
+        <p class="debug-time-display" id="debugTimeDisplay">No offset</p>
+      </div>
+      
+      <div class="debug-section">
+        <h3>Compliments</h3>
+        <div class="debug-buttons">
+          <button onclick="selectAllCompliments()">Select All</button>
+          <button onclick="unselectAllCompliments()">Unselect All</button>
+        </div>
+        <div class="debug-compliments-list" id="debugComplimentsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="version-number" id="versionNumber">v1.0.7</div>
 
   <script src="puzzles.js"></script>
   <script>
+    // Debug modal functions (defined first so onclick handlers work)
+    function openDebugModal() {
+      const modal = document.getElementById('debugModal');
+      modal.classList.add('show');
+      
+      // Update current solution
+      const targetWord = typeof TARGET_WORD !== 'undefined' ? TARGET_WORD : 'No puzzle loaded';
+      document.getElementById('debugSolution').textContent = targetWord;
+      
+      // Update time display
+      updateDebugTimeDisplay();
+      
+      // Load compliments list
+      loadDebugComplimentsList();
+    }
+    
+    function closeDebugModal() {
+      const modal = document.getElementById('debugModal');
+      modal.classList.remove('show');
+    }
+    
+    function adjustDebugTime(hours) {
+      const currentOffset = parseInt(localStorage.getItem('debugTimeOffset') || '0');
+      const newOffset = currentOffset + (hours * 60 * 60 * 1000);
+      localStorage.setItem('debugTimeOffset', newOffset.toString());
+      updateDebugTimeDisplay();
+    }
+    
+    function resetDebugTime() {
+      localStorage.removeItem('debugTimeOffset');
+      updateDebugTimeDisplay();
+      setTimeout(() => window.location.reload(), 500);
+    }
+    
+    function updateDebugTimeDisplay() {
+      const offset = parseInt(localStorage.getItem('debugTimeOffset') || '0');
+      const display = document.getElementById('debugTimeDisplay');
+      if (offset === 0) {
+        display.textContent = 'No offset';
+      } else {
+        const hours = offset / (1000 * 60 * 60);
+        display.textContent = `Offset: ${hours > 0 ? '+' : ''}${hours}h`;
+      }
+    }
+    
+    function loadDebugComplimentsList() {
+      const savedCompliments = getCompliments();
+      const listEl = document.getElementById('debugComplimentsList');
+      
+      // Create a map of saved compliments for quick lookup
+      const savedMap = {};
+      savedCompliments.forEach(c => {
+        savedMap[c.word] = c.unread;
+      });
+      
+      // Show all puzzles from dailyPuzzles array
+      listEl.innerHTML = dailyPuzzles.map((puzzle, index) => {
+        const isSeen = savedMap.hasOwnProperty(puzzle.word) && !savedMap[puzzle.word];
+        const isUnlocked = savedMap.hasOwnProperty(puzzle.word);
+        
+        return `
+          <div class="debug-compliment-item ${!isUnlocked ? 'locked' : ''}">
+            <label>
+              <input type="checkbox" 
+                     ${isSeen ? 'checked' : ''}
+                     onchange="toggleComplimentSeenByWord('${puzzle.word}', this.checked)">
+              <span>${puzzle.word} - ${puzzle.from}${!isUnlocked ? ' 🔒' : ''}</span>
+            </label>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function toggleComplimentSeenByWord(word, isSeen) {
+      const compliments = getCompliments();
+      const complimentIndex = compliments.findIndex(c => c.word === word);
+      const solvedPuzzles = getSolvedPuzzles();
+      const solvedIndex = solvedPuzzles.findIndex(p => p.word === word);
+      
+      if (isSeen) {
+        // Checking the box - mark as seen and solved
+        if (complimentIndex >= 0) {
+          compliments[complimentIndex].unread = false;
+        } else {
+          // Create the compliment if it doesn't exist yet and mark as seen
+          const puzzle = dailyPuzzles.find(p => p.word === word);
+          if (puzzle) {
+            compliments.push({
+              word: puzzle.word,
+              compliment: puzzle.compliment,
+              from: puzzle.from,
+              date: new Date().toISOString().split('T')[0],
+              unread: false
+            });
+          }
+        }
+        
+        // Also mark as solved if not already
+        if (solvedIndex < 0) {
+          solvedPuzzles.push({
+            word: word,
+            date: getTodayString(),
+            won: true
+          });
+        }
+      } else {
+        // Unchecking the box - remove from compliments and solved puzzles
+        if (complimentIndex >= 0) {
+          compliments.splice(complimentIndex, 1);
+        }
+        if (solvedIndex >= 0) {
+          solvedPuzzles.splice(solvedIndex, 1);
+        }
+      }
+      
+      localStorage.setItem('compliments', JSON.stringify(compliments));
+      localStorage.setItem('solvedPuzzles', JSON.stringify(solvedPuzzles));
+      updateNotificationBadge();
+    }
+    
+    function selectAllCompliments() {
+      dailyPuzzles.forEach(puzzle => {
+        toggleComplimentSeenByWord(puzzle.word, true);
+      });
+      loadDebugComplimentsList();
+    }
+    
+    function unselectAllCompliments() {
+      dailyPuzzles.forEach(puzzle => {
+        toggleComplimentSeenByWord(puzzle.word, false);
+      });
+      // Also clear lastPlayedDate so user can play immediately
+      localStorage.removeItem('lastPlayedDate');
+      loadDebugComplimentsList();
+    }
+
+    // Debug time functions (must be defined first)
+    function getDebugTimeOffset() {
+      return parseInt(localStorage.getItem('debugTimeOffset') || '0');
+    }
+
+    function getDebugAdjustedDate() {
+      const offset = getDebugTimeOffset();
+      return new Date(Date.now() + offset);
+    }
+
     // Start game function
     function startGame() {
       document.getElementById('introPage').style.display = 'none';
       document.getElementById('mainGame').style.display = 'flex';
+      
+      if (!canPlayToday()) {
+        // Show waiting message instead of game
+        showWaitingMessage();
+      }
     }
 
     // Format and display current date
     function formatDate() {
-      const now = new Date();
+      const now = getDebugAdjustedDate();
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       
@@ -98,26 +300,98 @@
     
     document.getElementById('date-subtitle').textContent = formatDate();
 
-    // Debug feature: tap "e" in Wordle 5 times to show answer
-    let debugTapCount = 0;
-    let debugOriginalText = '';
-    document.getElementById('debug-e').addEventListener('click', function(e) {
-      e.stopPropagation();
-      debugTapCount++;
-      if (debugTapCount === 5) {
-        debugOriginalText = document.getElementById('date-subtitle').textContent;
-        document.getElementById('date-subtitle').textContent = `Answer: ${TARGET_WORD.toUpperCase()}`;
-        setTimeout(() => {
-          document.getElementById('date-subtitle').textContent = debugOriginalText;
-          debugTapCount = 0;
-        }, 3000);
+    // Start game function
+    function startGame() {
+      document.getElementById('introPage').style.display = 'none';
+      document.getElementById('mainGame').style.display = 'flex';
+      
+      // Check if all puzzles completed
+      if (areAllPuzzlesCompleted()) {
+        showCompletedMessage();
+        return;
       }
-    });
+      
+      if (!canPlayToday()) {
+        // Show waiting message instead of game
+        showWaitingMessage();
+      }
+    }
 
-    // Get random puzzle
-    const puzzleIndex = Math.floor(Math.random() * dailyPuzzles.length);
-    const todaysPuzzle = dailyPuzzles[puzzleIndex];
-    const TARGET_WORD = todaysPuzzle.word;
+    // LocalStorage functions for puzzle tracking
+    function getSolvedPuzzles() {
+      const saved = localStorage.getItem('solvedPuzzles');
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    function getLastPlayedDate() {
+      return localStorage.getItem('lastPlayedDate');
+    }
+
+    function getTodayString() {
+      const today = getDebugAdjustedDate();
+      return today.toISOString().split('T')[0];
+    }
+
+    function canPlayToday() {
+      const lastPlayed = getLastPlayedDate();
+      const today = getTodayString();
+      return !lastPlayed || lastPlayed !== today;
+    }
+
+    function getFirstUnsolvedPuzzle() {
+      const solvedPuzzles = getSolvedPuzzles();
+      const solvedWords = new Set(solvedPuzzles.map(p => p.word));
+      
+      for (let puzzle of dailyPuzzles) {
+        if (!solvedWords.has(puzzle.word)) {
+          return puzzle;
+        }
+      }
+      // All puzzles solved
+      return null;
+    }
+
+    function saveSolvedPuzzle(word, won) {
+      const solvedPuzzles = getSolvedPuzzles();
+      const today = getTodayString();
+      
+      // Check if already saved
+      const exists = solvedPuzzles.some(p => p.word === word && p.date === today);
+      if (!exists) {
+        solvedPuzzles.push({
+          word: word,
+          date: today,
+          won: won
+        });
+        localStorage.setItem('solvedPuzzles', JSON.stringify(solvedPuzzles));
+        localStorage.setItem('lastPlayedDate', today);
+      }
+    }
+
+    function areAllPuzzlesCompleted() {
+      const solvedPuzzles = getSolvedPuzzles();
+      const solvedWords = new Set(solvedPuzzles.map(p => p.word));
+      return dailyPuzzles.every(puzzle => solvedWords.has(puzzle.word));
+    }
+
+    function showCompletedMessage() {
+      document.getElementById('completedMessage').style.display = 'flex';
+      document.getElementById('gameContent').style.display = 'none';
+      document.getElementById('waitingMessage').style.display = 'none';
+    }
+
+    function resetAllPuzzles() {
+      if (confirm('Are you sure you want to reset all puzzles? This will clear your progress and compliments.')) {
+        localStorage.removeItem('solvedPuzzles');
+        localStorage.removeItem('lastPlayedDate');
+        localStorage.removeItem('compliments');
+        window.location.reload();
+      }
+    }
+
+    // Get today's puzzle (first unsolved or wait for tomorrow)
+    const todaysPuzzle = getFirstUnsolvedPuzzle();
+    const TARGET_WORD = todaysPuzzle ? todaysPuzzle.word : '';
     const MAX_GUESSES = 6;
 
     let currentRow = 0;
@@ -207,6 +481,7 @@
         guess.push(tile.textContent);
       }
       const guessWord = guess.join('');
+      guesses.push(guessWord);
 
       // Check guess
       const result = checkGuess(guessWord);
@@ -293,6 +568,7 @@
     }
 
     function showCompliment() {
+      const won = guesses[guesses.length - 1] === TARGET_WORD;
       document.getElementById('modal-heading').textContent = `🎉 Today's Word: ${TARGET_WORD} 🎉`;
       document.getElementById('compliment').textContent = todaysPuzzle.compliment;
       document.getElementById('from').textContent = todaysPuzzle.from;
@@ -301,10 +577,24 @@
       
       // Save compliment to local storage
       saveCompliment(TARGET_WORD, todaysPuzzle.compliment, todaysPuzzle.from);
+      
+      // Save solved puzzle
+      saveSolvedPuzzle(TARGET_WORD, won);
     }
 
     function closeModal() {
       document.getElementById('modal').classList.remove('show');
+      
+      // Check if all puzzles completed first
+      if (areAllPuzzlesCompleted()) {
+        showCompletedMessage();
+      } else if (canPlayToday()) {
+        // Still can play today, reload to get next puzzle
+        window.location.reload();
+      } else {
+        // Show waiting message
+        showWaitingMessage();
+      }
     }
 
     // Local storage functions
@@ -394,6 +684,31 @@
     // Initialize notification badge on page load
     updateNotificationBadge();
 
+    // Show waiting message when puzzle already completed today
+    function showWaitingMessage() {
+      document.getElementById('waitingMessage').style.display = 'flex';
+      document.getElementById('gameContent').style.display = 'none';
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    }
+
+    function updateCountdown() {
+      const now = getDebugAdjustedDate();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const diff = tomorrow - now;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      const countdownEl = document.getElementById('countdown');
+      if (countdownEl) {
+        countdownEl.textContent = `Next puzzle in ${hours}h ${minutes}m ${seconds}s`;
+      }
+    }
+
     function createSnowflakes() {
       for (let i = 0; i < 30; i++) {
         setTimeout(() => {
@@ -423,52 +738,8 @@
       }
     });
 
-    // Mobile input handling
-    const mobileInput = document.getElementById('mobileInput');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    function updateMobileButtons() {
-      const isFull = mobileInput.value.length === 5;
-      submitBtn.disabled = !isFull;
-    }
-    
-    mobileInput.addEventListener('input', (e) => {
-      if (gameOver) return;
-      
-      let value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
-      e.target.value = value;
-      
-      // Clear current row
-      for (let i = 0; i < 5; i++) {
-        const tile = document.getElementById(`tile-${currentRow}-${i}`);
-        tile.textContent = '';
-        tile.classList.remove('filled');
-      }
-      
-      // Fill tiles with input value
-      currentTile = 0;
-      for (let i = 0; i < value.length && i < 5; i++) {
-        const tile = document.getElementById(`tile-${currentRow}-${i}`);
-        tile.textContent = value[i];
-        tile.classList.add('filled');
-        currentTile++;
-      }
-      
-      updateMobileButtons();
-    });
-    
-    mobileInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !submitBtn.disabled) {
-        handleMobileSubmit();
-      }
-    });
-    
-    function handleMobileSubmit() {
-      if (gameOver) return;
-      submitGuess();
-      mobileInput.value = '';
-      updateMobileButtons();
-    }
+    // Attach debug modal listener to version number
+    document.getElementById('versionNumber').addEventListener('click', openDebugModal);
   </script>
 </body>
 </html>

@@ -297,7 +297,7 @@ h1 {
   font-size: 0.75rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   user-select: none;
-  pointer-events: none;
+  cursor: pointer;
   z-index: 1000;
 }
 
@@ -751,5 +751,447 @@ h1 {
   .play-button {
     padding: 16px 50px;
     font-size: 1rem;
+  }
+}
+
+/* Waiting Message Styles */
+.waiting-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 30px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.waiting-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.waiting-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 12px;
+  font-family: 'Georgia', serif;
+}
+
+.waiting-text {
+  font-size: 1.1rem;
+  color: #666666;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.waiting-countdown {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #000000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  padding: 15px 30px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .waiting-message {
+    padding: 40px 20px;
+    min-height: 300px;
+  }
+  
+  .waiting-icon {
+    font-size: 3rem;
+  }
+  
+  .waiting-title {
+    font-size: 1.5rem;
+  }
+  
+  .waiting-text {
+    font-size: 1rem;
+  }
+  
+  .waiting-countdown {
+    font-size: 1.1rem;
+    padding: 12px 20px;
+  }
+}
+
+/* Completed Message Styles */
+.completed-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 30px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.completed-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.completed-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 15px;
+  font-family: 'Georgia', serif;
+}
+
+.completed-text {
+  font-size: 1.2rem;
+  color: #333333;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+.completed-subtext {
+  font-size: 1rem;
+  color: #666666;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.reset-button {
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.reset-button:hover {
+  background: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.reset-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .completed-message {
+    padding: 40px 20px;
+    min-height: 300px;
+  }
+  
+  .completed-icon {
+    font-size: 4rem;
+  }
+  
+  .completed-title {
+    font-size: 1.6rem;
+  }
+  
+  .completed-text {
+    font-size: 1.1rem;
+  }
+  
+  .completed-subtext {
+    font-size: 0.95rem;
+  }
+  
+  .reset-button {
+    padding: 12px 30px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Debug Modal Styles */
+.debug-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.debug-modal.show {
+  display: flex;
+}
+
+.debug-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.debug-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.debug-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
+.debug-close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.debug-close-btn:hover {
+  background: #f0f0f0;
+  color: #000;
+}
+
+.debug-section {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.debug-section:last-child {
+  border-bottom: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.debug-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
+.debug-solution {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  letter-spacing: 0.3em;
+}
+
+.debug-time-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.debug-time-controls button {
+  flex: 1;
+  min-width: 60px;
+  padding: 10px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
+.debug-time-controls button:hover {
+  background: #e8e8e8;
+  border-color: #ccc;
+}
+
+.debug-time-controls button:active {
+  transform: scale(0.95);
+}
+
+.debug-time-display {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+  font-family: monospace;
+}
+
+.debug-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.debug-buttons button {
+  flex: 1;
+  padding: 10px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
+.debug-buttons button:hover {
+  background: #e8e8e8;
+  border-color: #ccc;
+}
+
+.debug-buttons button:active {
+  transform: scale(0.95);
+}
+
+.debug-compliments-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  margin: -8px;
+  padding: 8px;
+}
+
+.debug-compliment-item {
+  padding: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: #fafafa;
+  transition: background 0.2s;
+}
+
+.debug-compliment-item.locked {
+  opacity: 0.5;
+  background: #f5f5f5;
+}
+
+.debug-compliment-item:hover {
+  background: #f5f5f5;
+}
+
+.debug-compliment-item.locked:hover {
+  background: #f5f5f5;
+}
+
+.debug-compliment-item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.debug-compliment-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.debug-compliment-item span {
+  font-size: 0.9rem;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
+/* Mobile optimizations for debug modal */
+@media (max-width: 768px) {
+  .debug-modal {
+    padding: 10px;
+  }
+  
+  .debug-modal-content {
+    max-height: 85vh;
+    border-radius: 8px;
+  }
+  
+  .debug-modal-header {
+    padding: 16px;
+  }
+  
+  .debug-modal-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .debug-section {
+    padding: 16px;
+  }
+  
+  .debug-solution {
+    font-size: 1.5rem;
+  }
+  
+  .debug-time-controls button {
+    min-width: 50px;
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+  
+  .debug-compliment-item {
+    padding: 10px;
+  }
+  
+  .debug-compliment-item span {
+    font-size: 0.85rem;
   }
 }

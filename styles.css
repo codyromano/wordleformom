@@ -33,6 +33,7 @@ body {
   display: flex;
   flex-direction: column;
   border: 1px solid #e8e8e8;
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
@@ -41,18 +42,7 @@ body {
   }
 }
 
-.app-header {
-  padding: 20px 20px 15px 20px;
-  background: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  flex-shrink: 0;
-}
 
-@media (min-width: 768px) {
-  .app-header {
-    padding: 40px 30px 30px 30px;
-  }
-}
 
 .tabs {
   display: flex;
@@ -64,6 +54,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
+  margin: 0;
 }
 
 @media (min-width: 768px) {
@@ -76,12 +68,12 @@ body {
   flex: 1;
   background: transparent;
   border: none;
-  padding: 15px 15px;
-  font-size: 0.75rem;
+  padding: 18px 15px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #767676;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  border-bottom: 3px solid transparent;
   transition: all 0.2s ease;
   position: relative;
   text-transform: uppercase;
@@ -91,7 +83,8 @@ body {
 
 @media (min-width: 768px) {
   .tab-btn {
-    padding: 12px 24px;
+    padding: 20px 24px;
+    font-size: 0.9rem;
   }
 }
 
@@ -123,13 +116,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding: 0 10px 10px 10px;
+  padding: 20px 10px 10px 10px;
   overflow-y: auto;
 }
 
 @media (min-width: 768px) {
   .tab-content {
-    padding: 0 20px 20px 20px;
+    padding: 30px 20px 20px 20px;
   }
 }
 
@@ -183,9 +176,9 @@ h1 {
 .board {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  gap: 5px;
+  margin-top: 5px;
+  margin-bottom: 8px;
   flex-shrink: 0;
 }
 
@@ -193,13 +186,13 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 @media (min-width: 768px) {
   .board {
-    margin-top: 25px;
-    margin-bottom: 25px;
+    margin-top: 15px;
+    margin-bottom: 15px;
     gap: 8px;
   }
   
@@ -210,14 +203,14 @@ h1 {
 
 .tile {
   aspect-ratio: 1;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   flex-shrink: 0;
-  border: 1.5px solid #d0d0d0;
+  border: 2px solid #d0d0d0;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   text-transform: uppercase;
   border-radius: 0;
@@ -232,9 +225,9 @@ h1 {
 
 @media (min-width: 768px) {
   .tile {
-    width: 62px;
-    height: 62px;
-    font-size: 2rem;
+    width: 68px;
+    height: 68px;
+    font-size: 2.25rem;
   }
 }
 
@@ -270,7 +263,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 30px;
+  margin-top: 15px;
   width: 100%;
   flex-shrink: 0;
 }
@@ -278,7 +271,7 @@ h1 {
 @media (min-width: 768px) {
   .keyboard {
     gap: 8px;
-    margin-top: 23px;
+    margin-top: 20px;
   }
 }
 
@@ -311,10 +304,10 @@ h1 {
   background: #d8d8d8;
   border: none;
   border-radius: 2px;
-  padding: 16px 2px;
+  padding: 18px 2px;
   flex: 1;
   min-width: 0;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.1s ease;
@@ -331,9 +324,9 @@ h1 {
 
 @media (min-width: 768px) {
   .key {
-    padding: 20px 12px;
-    min-width: 42px;
-    font-size: 0.75rem;
+    padding: 22px 12px;
+    min-width: 45px;
+    font-size: 0.85rem;
     flex: initial;
   }
 }
@@ -344,13 +337,13 @@ h1 {
 
 .key.wide {
   flex: 1.5;
-  font-size: 0.65em;
+  font-size: 0.7em;
 }
 
 @media (min-width: 768px) {
   .key.wide {
-    min-width: 65px;
-    font-size: 0.7rem;
+    min-width: 70px;
+    font-size: 0.75rem;
     flex: initial;
   }
 } background: #bbb;

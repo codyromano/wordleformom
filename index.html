@@ -33,11 +33,6 @@
 
   <!-- Main Game -->
   <div class="container" id="mainGame" style="display: none;">
-    <div class="app-header">
-      <h1>Kim's Wordle</h1>
-      <p class="subtitle" id="date-subtitle"></p>
-    </div>
-    
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('game')">Play</button>
       <button class="tab-btn" id="complimentsTab" onclick="switchTab('compliments')">
@@ -297,8 +292,6 @@
       
       return `${dayName}, ${monthName} ${date}${suffix}`;
     }
-    
-    document.getElementById('date-subtitle').textContent = formatDate();
 
     // Start game function
     function startGame() {

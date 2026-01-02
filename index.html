@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1.0.8">
+  <link rel="stylesheet" href="styles.css?v=1.0.9">
 </head>
 <body>
   <!-- Intro Page -->
@@ -85,7 +85,8 @@
         <button class="debug-close-btn" onclick="closeDebugModal()">×</button>
       </div>
       
-      <div class="debug-section">
+      <div class="debug-modal-body">
+        <div class="debug-section">
         <h3>Current Puzzle</h3>
         <p class="debug-solution" id="debugSolution">—</p>
       </div>
@@ -110,10 +111,19 @@
         </div>
         <div class="debug-compliments-list" id="debugComplimentsList"></div>
       </div>
+      
+      <div class="debug-section">
+        <h3>Local Storage</h3>
+        <div class="debug-buttons">
+          <button onclick="copyLocalStorageToClipboard()">Copy to Clipboard</button>
+        </div>
+        <p class="debug-info" id="copyStatus" style="display: none; margin-top: 8px; color: #4caf50; font-size: 14px;"></p>
+      </div>
+      </div>
     </div>
   </div>
 
-  <div class="version-number" id="versionNumber">v1.0.8</div>
+  <div class="version-number" id="versionNumber">v1.0.9</div>
 
   <script src="puzzles.js"></script>
   <script>
@@ -251,6 +261,113 @@
       // Also clear lastPlayedDate so user can play immediately
       localStorage.removeItem('lastPlayedDate');
       loadDebugComplimentsList();
+    }
+    
+    function copyLocalStorageToClipboard() {
+      const statusEl = document.getElementById('copyStatus');
+      
+      try {
+        // Create an object with all localStorage data, parsing JSON where applicable
+        const localStorageData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          const value = localStorage.getItem(key);
+          
+          // Try to parse JSON values for better readability
+          try {
+            localStorageData[key] = JSON.parse(value);
+          } catch {
+            // If not JSON, store as-is
+            localStorageData[key] = value;
+          }
+        }
+        
+        // Convert to formatted JSON with proper indentation
+        const jsonString = JSON.stringify(localStorageData, null, 2);
+        
+        // Try modern clipboard API first
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(jsonString).then(() => {
+            statusEl.textContent = '✓ Copied to clipboard!';
+            statusEl.style.color = '#4caf50';
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+              statusEl.style.display = 'none';
+            }, 3000);
+          }).catch(err => {
+            // Fallback if clipboard API fails
+            fallbackCopy(jsonString, statusEl);
+          });
+        } else {
+          // Use fallback for older browsers/mobile
+          fallbackCopy(jsonString, statusEl);
+        }
+      } catch (err) {
+        statusEl.textContent = '✗ Error: ' + err.message;
+        statusEl.style.color = '#f44336';
+        statusEl.style.display = 'block';
+        
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+          statusEl.style.color = '#4caf50';
+        }, 5000);
+      }
+    }
+    
+    function fallbackCopy(text, statusEl) {
+      try {
+        // Create a temporary textarea
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.top = '0';
+        textarea.style.left = '0';
+        textarea.style.width = '2em';
+        textarea.style.height = '2em';
+        textarea.style.padding = '0';
+        textarea.style.border = 'none';
+        textarea.style.outline = 'none';
+        textarea.style.boxShadow = 'none';
+        textarea.style.background = 'transparent';
+        document.body.appendChild(textarea);
+        
+        // Select and copy
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, text.length);
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        if (successful) {
+          statusEl.textContent = '✓ Copied to clipboard!';
+          statusEl.style.color = '#4caf50';
+          statusEl.style.display = 'block';
+          
+          setTimeout(() => {
+            statusEl.style.display = 'none';
+          }, 3000);
+        } else {
+          statusEl.textContent = '✗ Copy failed - try manually selecting the text';
+          statusEl.style.color = '#f44336';
+          statusEl.style.display = 'block';
+          
+          setTimeout(() => {
+            statusEl.style.display = 'none';
+            statusEl.style.color = '#4caf50';
+          }, 5000);
+        }
+      } catch (err) {
+        statusEl.textContent = '✗ Copy not supported on this browser';
+        statusEl.style.color = '#f44336';
+        statusEl.style.display = 'block';
+        
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+          statusEl.style.color = '#4caf50';
+        }, 5000);
+      }
     }
 
     // Debug time functions (must be defined first)

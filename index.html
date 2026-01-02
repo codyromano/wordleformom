@@ -804,11 +804,10 @@
 
     function updateCountdown() {
       const now = getDebugAdjustedDate();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
+      const nextMidnight = new Date(now);
+      nextMidnight.setHours(24, 0, 0, 0);
       
-      const diff = tomorrow - now;
+      const diff = nextMidnight - now;
       const hours = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);

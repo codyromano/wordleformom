@@ -412,6 +412,9 @@
 
     // Start game function
     function startGame() {
+      // Log visit for debugging
+      logVisit();
+      
       document.getElementById('introPage').style.display = 'none';
       document.getElementById('mainGame').style.display = 'flex';
       
@@ -451,6 +454,42 @@
       hours = hours ? hours : 12; // 0 should be 12
       const minutesStr = minutes < 10 ? '0' + minutes : minutes;
       return `${hours}:${minutesStr} ${ampm}`;
+    }
+
+    function logVisit() {
+      const now = Date.now();
+      const lastLogTime = parseInt(localStorage.getItem('lastVisitLogTime') || '0');
+      const RATE_LIMIT_MS = 30 * 1000; // 30 seconds
+      
+      // Rate limit: only log if 30 seconds have passed
+      if (now - lastLogTime < RATE_LIMIT_MS) {
+        return;
+      }
+      
+      const logs = getVisitLogs();
+      const canPlay = canPlayToday();
+      const timestamp = getDebugAdjustedDate().toISOString();
+      const time = getTimeString();
+      
+      logs.push({
+        timestamp: timestamp,
+        time: time,
+        canPlay: canPlay
+      });
+      
+      // Keep only last 100 logs to prevent storage bloat
+      if (logs.length > 100) {
+        logs.shift();
+      }
+      
+      localStorage.setItem('visitLogs', JSON.stringify(logs));
+      localStorage.setItem('lastVisitLogTime', now.toString());
+      console.log(`[Visit Log] ${time} - Can play: ${canPlay}`);
+    }
+
+    function getVisitLogs() {
+      const saved = localStorage.getItem('visitLogs');
+      return saved ? JSON.parse(saved) : [];
     }
 
     function canPlayToday() {

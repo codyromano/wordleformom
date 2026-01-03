@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1.0.9">
+  <link rel="stylesheet" href="styles.css?v=1.0.10">
 </head>
 <body>
   <!-- Intro Page -->
@@ -442,6 +442,17 @@
       return today.toISOString().split('T')[0];
     }
 
+    function getTimeString() {
+      const now = getDebugAdjustedDate();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'pm' : 'am';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0 should be 12
+      const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+      return `${hours}:${minutesStr} ${ampm}`;
+    }
+
     function canPlayToday() {
       const lastPlayed = getLastPlayedDate();
       const today = getTodayString();
@@ -464,6 +475,7 @@
     function saveSolvedPuzzle(word, won) {
       const solvedPuzzles = getSolvedPuzzles();
       const today = getTodayString();
+      const time = getTimeString();
       
       // Check if already saved
       const exists = solvedPuzzles.some(p => p.word === word && p.date === today);
@@ -471,6 +483,7 @@
         solvedPuzzles.push({
           word: word,
           date: today,
+          time: time,
           won: won
         });
         localStorage.setItem('solvedPuzzles', JSON.stringify(solvedPuzzles));
@@ -679,6 +692,7 @@
 
     function showCompliment() {
       const won = guesses[guesses.length - 1] === TARGET_WORD;
+      const time = getTimeString();
       document.getElementById('modal-heading').textContent = `🎉 Today's Word: ${TARGET_WORD} 🎉`;
       document.getElementById('compliment').textContent = todaysPuzzle.compliment;
       document.getElementById('from').textContent = todaysPuzzle.from;
@@ -686,7 +700,7 @@
       createSnowflakes();
       
       // Save compliment to local storage
-      saveCompliment(TARGET_WORD, todaysPuzzle.compliment, todaysPuzzle.from);
+      saveCompliment(TARGET_WORD, todaysPuzzle.compliment, todaysPuzzle.from, time);
       
       // Save solved puzzle
       saveSolvedPuzzle(TARGET_WORD, won);
@@ -708,7 +722,7 @@
     }
 
     // Local storage functions
-    function saveCompliment(word, compliment, from) {
+    function saveCompliment(word, compliment, from, time) {
       const compliments = getCompliments();
       const today = new Date().toISOString().split('T')[0];
       
@@ -720,6 +734,7 @@
           compliment: compliment,
           from: from,
           date: today,
+          time: time,
           unread: true
         });
         localStorage.setItem('compliments', JSON.stringify(compliments));
@@ -778,13 +793,14 @@
         listEl.innerHTML = compliments.reverse().map(c => {
           const date = new Date(c.date);
           const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const timeStr = c.time ? ` at ${c.time}` : '';
           
           return `
             <div class="compliment-card">
               <div class="compliment-card-word">${c.word}</div>
               <div class="compliment-card-text">${c.compliment}</div>
               <div class="compliment-card-from">${c.from}</div>
-              <div class="compliment-card-date">${formattedDate}</div>
+              <div class="compliment-card-date">${formattedDate}${timeStr}</div>
             </div>
           `;
         }).join('');
